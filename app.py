@@ -343,18 +343,37 @@ with tab_chat:
                             # Update local session state if active
                             if hist_idx < len(st.session_state.chat_history):
                                 st.session_state.chat_history[hist_idx]["eval_scores"] = scores
-                                st.rerun()
+                                
+                                # Trigger a thread-safe rerun via runtime
+                                try:
+                                    from streamlit.runtime import get_instance
+                                    runtime = get_instance()
+                                    session_info = runtime._session_mgr.get_active_session_info(ctx.session_id)
+                                    if session_info:
+                                        session_info.session.request_rerun(None)
+                                except Exception as e:
+                                    print(f"[AsyncEval] Rerun trigger failed: {e}")
                         except Exception as ex:
                             print(f"[AsyncEval] Failed: {ex}")
                             # Clean up loading state if failed
                             if hist_idx < len(st.session_state.chat_history):
                                 st.session_state.chat_history[hist_idx]["eval_scores"] = {}
-                                st.rerun()
+                                
+                                # Trigger a thread-safe rerun via runtime
+                                try:
+                                    from streamlit.runtime import get_instance
+                                    runtime = get_instance()
+                                    session_info = runtime._session_mgr.get_active_session_info(ctx.session_id)
+                                    if session_info:
+                                        session_info.session.request_rerun(None)
+                                except Exception as e:
+                                    print(f"[AsyncEval] Rerun trigger failed: {e}")
 
                     thread = threading.Thread(
                         target=eval_bg_worker,
                         args=(user_query, context, answer, row_id, st.session_state.api_key, len(st.session_state.chat_history) - 1)
                     )
+                    add_script_run_ctx(thread)
                     thread.start()
                 else:
                     # Clean up eval scores dict if answer not found
