@@ -23,6 +23,13 @@ FAISS_INDEX_DIR.mkdir(parents=True, exist_ok=True)
 
 # ─── API Keys ─────────────────────────────────────────────────────────────────
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+if not GROQ_API_KEY:
+    try:
+        import streamlit as st
+        if "GROQ_API_KEY" in st.secrets:
+            GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+    except Exception:
+        pass
 
 # ─── Model identifiers ────────────────────────────────────────────────────────
 EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"   # HuggingFaceEmbeddings

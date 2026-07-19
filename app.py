@@ -115,11 +115,19 @@ html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
 # ─── Startup ──────────────────────────────────────────────────────────────────
 initialize_database()
 
+# Get key from environment or secrets
+temp_key = GROQ_API_KEY
+if not temp_key:
+    try:
+        temp_key = st.secrets.get("GROQ_API_KEY", "")
+    except Exception:
+        pass
+
 for key, default in [
     ("vectorstore",     None),
     ("chat_history",    []),
     ("available_cars",  {}),
-    ("api_key",         GROQ_API_KEY),
+    ("api_key",         temp_key),
     ("selected_brand",  ""),
     ("selected_model",  ""),
     ("last_ingested_info", None),
@@ -255,10 +263,18 @@ with tab_chat:
         )
 
         if user_query:
+            # Dynamically refresh api_key from st.secrets or environment if it is currently empty
+            if not st.session_state.api_key:
+                try:
+                    import os
+                    st.session_state.api_key = st.secrets.get("GROQ_API_KEY", "") or os.getenv("GROQ_API_KEY", "")
+                except Exception:
+                    pass
+
             if not st.session_state.vectorstore:
                 st.error("No brochure indexed yet. Use the Ingest tab.")
             elif not st.session_state.api_key:
-                st.error("Groq API key is missing. Please add GROQ_API_KEY to your .env file.")
+                st.error("Groq API key is missing. Please add GROQ_API_KEY to your Streamlit Secrets or .env file.")
             else:
                 st.session_state.chat_history.append(
                     {"role": "user", "content": user_query}
