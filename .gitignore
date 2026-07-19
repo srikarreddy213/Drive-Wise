@@ -1,0 +1,18 @@
+# Python caching
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables & secrets
+.env
+.env.*
+
+# Local databases
+data/logs.db
+
+# Large brochure PDF files
+data/brochures/
+new-brochuse/
+
+# Streamlit specific
+.streamlit/
