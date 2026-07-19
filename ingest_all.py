@@ -23,7 +23,9 @@ from src.vector_store import (
     get_available_cars,
 )
 
-SRC_DIR = Path(__file__).parent / "new-brochuse"
+SRC_DIR = Path(__file__).parent / "new-cars"
+if not SRC_DIR.exists():
+    SRC_DIR = Path(__file__).parent / "new-brochuse"
 
 def parse_filename(filename: str) -> tuple[str, str, str]:
     # Decode URL-encoded names
@@ -62,6 +64,8 @@ def parse_filename(filename: str) -> tuple[str, str, str]:
         brand = "Kia"
     elif "mahindra" in name_clean_lower:
         brand = "Mahindra"
+    elif "mitsubishi" in name_clean_lower or "pajero" in name_clean_lower:
+        brand = "Mitsubishi"
 
     # 3. Clean up model name
     # Replace separators with space
@@ -69,20 +73,29 @@ def parse_filename(filename: str) -> tuple[str, str, str]:
     
     # Extract version (year)
     version = "2026"  # Default fallback version
-    # Match 4 digit year (19xx or 20xx)
-    year_match = re.search(r'\b(19\d{2}|20\d{2})\b', clean_name)
-    if year_match:
-        version = year_match.group(1)
-        clean_name = re.sub(rf'\b{version}\b', '', clean_name, flags=re.IGNORECASE)
+    
+    # Match Model Year (e.g. 25MY or MY25)
+    my_match = re.search(r'\b(\d{2})my\b|\bmy(\d{2})\b', name_clean_lower)
+    if my_match:
+        short_year = my_match.group(1) or my_match.group(2)
+        version = "20" + short_year
+        # Remove the Model Year token from clean name
+        clean_name = re.sub(r'\b\d{2}my\b|\bmy\d{2}\b', '', clean_name, flags=re.IGNORECASE)
     else:
-        # Match 2 digit year suffix after dash/underscore at the end (e.g. _25 or -25)
-        short_year_match = re.search(r'\b(2[0-6]|1[0-9])\b', clean_name)
-        if short_year_match:
-            version = "20" + short_year_match.group(1)
-            clean_name = re.sub(rf'\b{short_year_match.group(1)}\b', '', clean_name, flags=re.IGNORECASE)
+        # Match 4 digit year (19xx or 20xx)
+        year_match = re.search(r'\b(19\d{2}|20\d{2})\b', clean_name)
+        if year_match:
+            version = year_match.group(1)
+            clean_name = re.sub(rf'\b{version}\b', '', clean_name, flags=re.IGNORECASE)
+        else:
+            # Match 2 digit year suffix after dash/underscore at the end (e.g. _25 or -25)
+            short_year_match = re.search(r'\b(2[0-6]|1[0-9])\b', clean_name)
+            if short_year_match:
+                version = "20" + short_year_match.group(1)
+                clean_name = re.sub(rf'\b{short_year_match.group(1)}\b', '', clean_name, flags=re.IGNORECASE)
 
     # Remove brand prefixes/tokens
-    brand_tokens = ["mercedes benz", "mercedes-benz", "mercedes", "bmw", "tata", "hyundai", "ducati", "nissan", "suzuki", "volkswagen", "vw", "ford", "lamborghini", "kia", "mahindra", "mb"]
+    brand_tokens = ["mercedes benz", "mercedes-benz", "mercedes", "bmw", "tata", "hyundai", "ducati", "nissan", "suzuki", "volkswagen", "vw", "ford", "lamborghini", "kia", "mahindra", "mb", "mitsubishi"]
     
     # Remove brand names from the model string
     for bt in brand_tokens:
