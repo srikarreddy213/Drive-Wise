@@ -23,7 +23,9 @@ from src.vector_store import (
     get_available_cars,
 )
 
-SRC_DIR = Path(__file__).parent / "new-cars"
+SRC_DIR = Path(__file__).parent / "new-broche"
+if not SRC_DIR.exists():
+    SRC_DIR = Path(__file__).parent / "new-cars"
 if not SRC_DIR.exists():
     SRC_DIR = Path(__file__).parent / "new-brochuse"
 
@@ -44,6 +46,8 @@ def parse_filename(filename: str) -> tuple[str, str, str]:
         brand = "Mercedes-Benz"
     elif "bmw" in name_clean_lower:
         brand = "Bmw"
+    elif "gmc" in name_clean_lower:
+        brand = "GMC"
     elif "nissan" in name_clean_lower or "patrol" in name_clean_lower:
         brand = "Nissan"
     elif "nexon" in name_clean_lower or "safari" in name_clean_lower or "harrier" in name_clean_lower or "sierra" in name_clean_lower or "tata" in name_clean_lower:
@@ -66,6 +70,16 @@ def parse_filename(filename: str) -> tuple[str, str, str]:
         brand = "Mahindra"
     elif "mitsubishi" in name_clean_lower or "pajero" in name_clean_lower:
         brand = "Mitsubishi"
+    elif "cadillac" in name_clean_lower:
+        brand = "Cadillac"
+    elif "chrysler" in name_clean_lower:
+        brand = "Chrysler"
+    elif "land rover" in name_clean_lower or "range rover" in name_clean_lower:
+        brand = "Land Rover"
+    elif "rolls royce" in name_clean_lower:
+        brand = "Rolls-Royce"
+    elif "toyota" in name_clean_lower:
+        brand = "Toyota"
 
     # 3. Clean up model name
     # Replace separators with space
@@ -95,7 +109,7 @@ def parse_filename(filename: str) -> tuple[str, str, str]:
                 clean_name = re.sub(rf'\b{short_year_match.group(1)}\b', '', clean_name, flags=re.IGNORECASE)
 
     # Remove brand prefixes/tokens
-    brand_tokens = ["mercedes benz", "mercedes-benz", "mercedes", "bmw", "tata", "hyundai", "ducati", "nissan", "suzuki", "volkswagen", "vw", "ford", "lamborghini", "kia", "mahindra", "mb", "mitsubishi"]
+    brand_tokens = ["mercedes benz", "mercedes-benz", "mercedes", "bmw", "tata", "hyundai", "ducati", "nissan", "suzuki", "volkswagen", "vw", "ford", "lamborghini", "kia", "mahindra", "mb", "mitsubishi", "cadillac", "chrysler", "gmc", "land rover", "range rover", "rolls royce", "toyota"]
     
     # Remove brand names from the model string
     for bt in brand_tokens:
@@ -193,6 +207,15 @@ def parse_filename(filename: str) -> tuple[str, str, str]:
     elif brand == "Volkswagen":
         if "id polo" in name_clean_lower or "id. polo" in name_clean_lower:
             model = "ID. Polo"
+    elif brand == "Land Rover":
+        if "sport" in name_clean_lower:
+            model = "Range Rover Sport"
+        elif "defender" in name_clean_lower:
+            model = "Defender"
+        elif "discovery" in name_clean_lower:
+            model = "Discovery"
+        elif "range rover" in name_clean_lower:
+            model = "Range Rover"
             
     # Remove any empty model or default
     if not model or model == ".":
