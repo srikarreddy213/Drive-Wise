@@ -543,12 +543,20 @@ with tab_ingest:
                 if fs not in suggestions:
                     suggestions.append(fs)
 
+            # Callback function to safely update ingest_quick_q_input before widget renders
+            def update_quick_q(val: str):
+                st.session_state["ingest_quick_q_input"] = val
+
             # Render suggestion buttons in a clean list
             st.markdown("**💡 Suggested Questions (click to ask):**")
             for idx, sug in enumerate(suggestions):
-                if st.button(f"🔍 {sug}", key=f"sug_{idx}", use_container_width=True):
-                    st.session_state.ingest_quick_q_input = sug
-                    st.rerun()
+                st.button(
+                    f"🔍 {sug}",
+                    key=f"sug_{idx}",
+                    use_container_width=True,
+                    on_click=update_quick_q,
+                    args=(sug,),
+                )
 
             st.markdown("")
             
@@ -591,9 +599,13 @@ with tab_ingest:
                                 st.divider()
                                 
                     # Add a clear button
-                    if st.button("🗑️ Clear Answer", key="clear_quick_q", use_container_width=True):
-                        st.session_state.ingest_quick_q_input = ""
-                        st.rerun()
+                    st.button(
+                        "🗑️ Clear Answer",
+                        key="clear_quick_q",
+                        use_container_width=True,
+                        on_click=update_quick_q,
+                        args=("",),
+                    )
 
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 3 — ANALYTICS

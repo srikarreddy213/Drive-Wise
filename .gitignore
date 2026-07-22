@@ -17,3 +17,8 @@ new-brochuse/
 # Streamlit specific
 .streamlit/
 new-cars/
+
+# Study material & temp recovery
+DriveWise_Complete_Study_Material.pdf
+recover_brochures.py
+data/brochures_recovered/
