@@ -98,9 +98,11 @@ def ingest_brochure(
 
 
 def save_uploaded_pdf(uploaded_file, car_brand: str, car_model: str) -> str:
-    """Save a Streamlit UploadedFile to data/brochures/. Returns the path."""
+    """Save a Streamlit UploadedFile to data/brochures/<brand>/. Returns the path."""
+    brand_folder = BROCHURES_DIR / car_brand.lower().strip().replace(' ', '_').replace('-', '_')
+    brand_folder.mkdir(parents=True, exist_ok=True)
     filename  = f"{car_brand.lower().strip()}_{car_model.lower().strip()}.pdf"
-    save_path = BROCHURES_DIR / filename
+    save_path = brand_folder / filename
     with open(save_path, "wb") as fh:
         fh.write(uploaded_file.getbuffer())
     return str(save_path)

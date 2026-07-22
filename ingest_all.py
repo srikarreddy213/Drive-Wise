@@ -281,9 +281,11 @@ def main():
             else:
                 store = add_documents_to_store(docs, store)
                 
-            # 3. Save a clean copy of the brochure
+            # 3. Save a clean copy of the brochure in brand subfolder
+            brand_folder = BROCHURES_DIR / brand.lower().strip().replace(' ', '_').replace('-', '_')
+            brand_folder.mkdir(parents=True, exist_ok=True)
             dest_filename = f"{brand.lower().strip().replace(' ', '_')}_{model.lower().strip().replace(' ', '_')}_{version}.pdf"
-            dest_path = BROCHURES_DIR / dest_filename
+            dest_path = brand_folder / dest_filename
             shutil.copy2(pdf_path, dest_path)
             
             success_count += 1
