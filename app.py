@@ -613,10 +613,21 @@ with tab_ingest:
 with tab_analytics:
     st.markdown("<h2 style='color:#e2e8f0'>📊 Analytics Dashboard</h2>", unsafe_allow_html=True)
 
-    if st.button("🔄 Refresh"):
+    if st.button("🔄 Refresh", use_container_width=False):
+        st.cache_data.clear()
+        st.toast("✅ Analytics data refreshed!", icon="🔄")
         st.rerun()
 
-    stats = get_summary_stats()
+    # Cached analytics helpers — cleared when Refresh is clicked
+    @st.cache_data(ttl=30, show_spinner=False)
+    def _cached_summary_stats():
+        return get_summary_stats()
+
+    @st.cache_data(ttl=30, show_spinner=False)
+    def _cached_all_logs():
+        return get_all_logs()
+
+    stats = _cached_summary_stats()
     k1, k2, k3, k4, k5 = st.columns(5)
     k1.metric("Total Queries",      stats["total_queries"])
     k2.metric("Avg Response Time",  f"{stats['avg_response_time']}s")
@@ -625,7 +636,7 @@ with tab_analytics:
     k5.metric("Unanswered",         stats["failed_count"])
 
     st.divider()
-    logs = get_all_logs()
+    logs = _cached_all_logs()
 
     if not logs:
         st.info("No query logs yet. Start asking questions in the Chat tab!")
